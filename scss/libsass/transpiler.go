@@ -8,8 +8,11 @@
 package libsass
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"strings"
 
 	"github.com/bep/go-tocss/api"
 	"github.com/bep/go-tocss/scss"
@@ -44,7 +47,7 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 	}
 
 	libs.SassOptionSetSourceMapEmbed(opts, t.options.EnableEmbeddedSourceMap)
-	//libs.SassOptionSetIncludePath(opts, incs)
+	libs.SassOptionSetIncludePath(opts, strings.Join(t.options.IncludePaths, string(os.PathListSeparator)))
 	//libs.SassOptionSetPrecision(opts, TODO)
 	libs.SassOptionSetOutputStyle(opts, int(t.options.OutputStyle))
 	libs.SassOptionSetSourceComments(opts, false)
@@ -65,7 +68,7 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 
 	// Error handling.
 	//libs.SassContextGetErrorStatus(goctx)
-	//libs.SassContextGetErrorJSON(goctx)
+	fmt.Println(strings.TrimSpace(libs.SassContextGetErrorJSON(ctx)))
 
 	return nil
 }

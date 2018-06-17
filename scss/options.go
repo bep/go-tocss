@@ -20,9 +20,13 @@ const (
 )
 
 type Options struct {
+	// Default is nested.
 	OutputStyle OutputStyle
 
-	// WithImportResolver can be used to supply a custom import resolver, both to redirect
+	// File paths to use to resolve imports.
+	IncludePaths []string
+
+	// ImportResolver can be used to supply a custom import resolver, both to redirect
 	// to another URL or to return the body.
 	ImportResolver func(url string, prev string) (newURL string, body string, resolved bool)
 
