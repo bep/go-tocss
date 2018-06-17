@@ -3,7 +3,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
-// Package sass provides options for SASS transpilers. Note that there are no
+// Package scss provides options for SCSS transpilers. Note that there are no
 // current pure Go SASS implementation, so the only option is CGO and LibSASS.
 // But hopefully, fingers crossed, this will happen.
 package scss

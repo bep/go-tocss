@@ -3,8 +3,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
-// Package libsass provides a SASS ans SCSS transpiler to CSS
-// using github.com/wellington/go-libsass/libs.
+// Package libsass a SCSS transpiler to CSS using github.com/wellington/go-libsass/libs.
 package libsass
 
 import (
