@@ -8,6 +8,11 @@
 // But hopefully, fingers crossed, this will happen.
 package scss
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type (
 	OutputStyle int
 )
@@ -32,4 +37,23 @@ type Options struct {
 
 	EnableEmbeddedSourceMap bool // TODO(bep) test this
 
+}
+
+func JSONToError(jsonstr string) (e Error) {
+	if err := json.Unmarshal([]byte(jsonstr), &e); err != nil {
+		e.Message = "unknown error"
+	}
+	return
+}
+
+type Error struct {
+	Status  int    `json:"status"`
+	Column  int    `json:"column"`
+	File    string `json:"file"`
+	Line    int    `json:"line"`
+	Message string `json:"message"`
+}
+
+func (e Error) Error() string {
+	return fmt.Sprintf("file %q, line %d, col %d: %s ", e.File, e.Line, e.Column, e.Message)
 }

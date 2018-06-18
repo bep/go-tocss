@@ -66,9 +66,9 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 
 	io.WriteString(dst, result)
 
-	// Error handling.
-	//libs.SassContextGetErrorStatus(goctx)
-	//fmt.Println(strings.TrimSpace(libs.SassContextGetErrorJSON(ctx)))
+	if status := libs.SassContextGetErrorStatus(ctx); status != 0 {
+		return scss.JSONToError(libs.SassContextGetErrorJSON(ctx))
+	}
 
 	return nil
 }
