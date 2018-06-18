@@ -3,9 +3,9 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
-// Package api provides the common API for the tranpilation of the source
+// Package tocss provides the common API for tranpilation of the source
 // to CSS.
-package api
+package tocss
 
 import (
 	"io"

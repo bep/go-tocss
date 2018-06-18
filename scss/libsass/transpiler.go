@@ -7,18 +7,17 @@
 package libsass
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 
-	"github.com/bep/go-tocss/api"
 	"github.com/bep/go-tocss/scss"
+	"github.com/bep/go-tocss/tocss"
 	"github.com/wellington/go-libsass/libs"
 )
 
-var _ api.Transpiler = (*libsassTranspiler)(nil)
+var _ tocss.Transpiler = (*libsassTranspiler)(nil)
 
 type libsassTranspiler struct {
 	options scss.Options
@@ -59,6 +58,8 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 	libs.SassCompilerExecute(compiler)
 
 	libs.SassOptionSetSourceMapEmbed(opts, t.options.EnableEmbeddedSourceMap)
+	libs.SassOptionSetSourceMapContents(opts, true)
+
 	defer libs.SassDeleteCompiler(compiler)
 
 	result := libs.SassContextGetOutputString(ctx)
@@ -67,7 +68,7 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 
 	// Error handling.
 	//libs.SassContextGetErrorStatus(goctx)
-	fmt.Println(strings.TrimSpace(libs.SassContextGetErrorJSON(ctx)))
+	//fmt.Println(strings.TrimSpace(libs.SassContextGetErrorJSON(ctx)))
 
 	return nil
 }
