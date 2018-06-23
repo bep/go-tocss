@@ -25,8 +25,12 @@ const (
 )
 
 type Options struct {
+	//TODO(bep) icon font path
 	// Default is nested.
 	OutputStyle OutputStyle
+
+	// Precision of floating point math.
+	Precision int
 
 	// File paths to use to resolve imports.
 	IncludePaths []string

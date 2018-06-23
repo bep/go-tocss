@@ -44,6 +44,10 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 		defer libs.RemoveImporter(idx)
 	}
 
+	if t.options.Precision != 0 {
+		libs.SassOptionSetPrecision(opts, t.options.Precision)
+	}
+
 	libs.SassOptionSetSourceMapEmbed(opts, t.options.EnableEmbeddedSourceMap)
 	libs.SassOptionSetIncludePath(opts, strings.Join(t.options.IncludePaths, string(os.PathListSeparator)))
 	//libs.SassOptionSetPrecision(opts, TODO)
