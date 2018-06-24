@@ -44,16 +44,28 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 		defer libs.RemoveImporter(idx)
 	}
 
-	if t.options.Precision != 0 {
-		libs.SassOptionSetPrecision(opts, t.options.Precision)
-	}
+	{
 
-	libs.SassOptionSetSourceMapEmbed(opts, t.options.EnableEmbeddedSourceMap)
-	libs.SassOptionSetIncludePath(opts, strings.Join(t.options.IncludePaths, string(os.PathListSeparator)))
-	//libs.SassOptionSetPrecision(opts, TODO)
-	libs.SassOptionSetOutputStyle(opts, int(t.options.OutputStyle))
-	libs.SassOptionSetSourceComments(opts, false)
-	libs.SassDataContextSetOptions(dataCtx, opts)
+		// Set options
+		if t.options.Precision != 0 {
+			libs.SassOptionSetPrecision(opts, t.options.Precision)
+		}
+
+		if t.options.SourceMapFilename != "" {
+			libs.SassOptionSetSourceMapFile(opts, t.options.SourceMapFilename)
+		}
+
+		if t.options.SourceMapRoot != "" {
+			libs.SassOptionSetSourceMapRoot(opts, t.options.SourceMapRoot)
+		}
+
+		libs.SassOptionSetOmitSourceMapURL(opts, t.options.OmitSourceMapURL)
+		libs.SassOptionSetSourceMapEmbed(opts, t.options.EnableEmbeddedSourceMap)
+		libs.SassOptionSetIncludePath(opts, strings.Join(t.options.IncludePaths, string(os.PathListSeparator)))
+		libs.SassOptionSetOutputStyle(opts, int(t.options.OutputStyle))
+		libs.SassOptionSetSourceComments(opts, false)
+		libs.SassDataContextSetOptions(dataCtx, opts)
+	}
 
 	ctx := libs.SassDataContextGetContext(dataCtx)
 	compiler := libs.SassMakeDataCompiler(dataCtx)

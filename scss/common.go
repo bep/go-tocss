@@ -25,7 +25,6 @@ const (
 )
 
 type Options struct {
-	//TODO(bep) icon font path
 	// Default is nested.
 	OutputStyle OutputStyle
 
@@ -39,8 +38,11 @@ type Options struct {
 	// to another URL or to return the body.
 	ImportResolver func(url string, prev string) (newURL string, body string, resolved bool)
 
-	EnableEmbeddedSourceMap bool // TODO(bep) test this
-
+	// Source map settings
+	SourceMapFilename       string
+	SourceMapRoot           string
+	OmitSourceMapURL        bool
+	EnableEmbeddedSourceMap bool
 }
 
 func JSONToError(jsonstr string) (e Error) {
