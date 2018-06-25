@@ -17,36 +17,38 @@ import (
 	"github.com/wellington/go-libsass/libs"
 )
 
-var _ tocss.Transpiler = (*libsassTranspiler)(nil)
-
 type libsassTranspiler struct {
 	options scss.Options
 }
 
-func New(options scss.Options) (*libsassTranspiler, error) {
+// New creates a new libsass transpiler configured with the given options.
+func New(options scss.Options) (tocss.Transpiler, error) {
 	return &libsassTranspiler{options: options}, nil
 }
 
-func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
-	// TODO(bep) basepath
+// Execute transpiles the SCSS from src into dst. Note that you can import
+// older SASS (.sass) files, but the main entry (src) currently needs to be SCSS.
+func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) (tocss.Result, error) {
+	var result tocss.Result
 
 	b, err := ioutil.ReadAll(src)
 	if err != nil {
-		return err
+		return result, err
 	}
 	sourceStr := string(b)
 
 	dataCtx := libs.SassMakeDataContext(sourceStr)
+
 	opts := libs.SassDataContextGetOptions(dataCtx)
 
-	if t.options.ImportResolver != nil {
-		idx := libs.BindImporter(opts, t.options.ImportResolver)
-		defer libs.RemoveImporter(idx)
-	}
-
 	{
-
 		// Set options
+
+		if t.options.ImportResolver != nil {
+			idx := libs.BindImporter(opts, t.options.ImportResolver)
+			defer libs.RemoveImporter(idx)
+		}
+
 		if t.options.Precision != 0 {
 			libs.SassOptionSetPrecision(opts, t.options.Precision)
 		}
@@ -59,6 +61,14 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 			libs.SassOptionSetSourceMapRoot(opts, t.options.SourceMapRoot)
 		}
 
+		if t.options.OutputPath != "" {
+			libs.SassOptionSetOutputPath(opts, t.options.OutputPath)
+		}
+		if t.options.InputPath != "" {
+			libs.SassOptionSetInputPath(opts, t.options.InputPath)
+		}
+
+		libs.SassOptionSetSourceMapContents(opts, t.options.SourceMapContents)
 		libs.SassOptionSetOmitSourceMapURL(opts, t.options.OmitSourceMapURL)
 		libs.SassOptionSetSourceMapEmbed(opts, t.options.EnableEmbeddedSourceMap)
 		libs.SassOptionSetIncludePath(opts, strings.Join(t.options.IncludePaths, string(os.PathListSeparator)))
@@ -73,18 +83,18 @@ func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) error {
 	libs.SassCompilerParse(compiler)
 	libs.SassCompilerExecute(compiler)
 
-	libs.SassOptionSetSourceMapEmbed(opts, t.options.EnableEmbeddedSourceMap)
-	libs.SassOptionSetSourceMapContents(opts, true)
-
 	defer libs.SassDeleteCompiler(compiler)
 
-	result := libs.SassContextGetOutputString(ctx)
+	outputString := libs.SassContextGetOutputString(ctx)
 
-	io.WriteString(dst, result)
+	io.WriteString(dst, outputString)
 
 	if status := libs.SassContextGetErrorStatus(ctx); status != 0 {
-		return scss.JSONToError(libs.SassContextGetErrorJSON(ctx))
+		return result, scss.JSONToError(libs.SassContextGetErrorJSON(ctx))
 	}
 
-	return nil
+	result.SourceMapFilename = libs.SassOptionGetSourceMapFile(opts)
+	result.SourceMapContent = libs.SassContextGetSourceMapString(ctx)
+
+	return result, nil
 }

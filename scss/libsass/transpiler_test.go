@@ -7,6 +7,9 @@ package libsass
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 
@@ -33,7 +36,8 @@ div { p { color: $white; } }`)
 	transpiler, err := New(scss.Options{ImportResolver: importResolver})
 	assert.NoError(err)
 
-	assert.NoError(transpiler.Execute(&dst, src))
+	_, err = transpiler.Execute(&dst, src)
+	assert.NoError(err)
 	assert.Equal("div p {\n  color: #fff; }\n", dst.String())
 }
 
@@ -47,8 +51,49 @@ div { p { color: #ccc; } }`)
 	transpiler, err := New(scss.Options{OutputStyle: scss.CompressedStyle})
 	assert.NoError(err)
 
-	assert.NoError(transpiler.Execute(&dst, src))
+	_, err = transpiler.Execute(&dst, src)
+	assert.NoError(err)
 	assert.Equal("div p{color:#ccc}\n", dst.String())
+}
+
+func TestSourceMapSettings(t *testing.T) {
+	dir, _ := ioutil.TempDir(os.TempDir(), "tocss")
+	defer os.RemoveAll(dir)
+
+	colors := filepath.Join(dir, "_colors.scss")
+
+	ioutil.WriteFile(colors, []byte(`
+$moo:       #f442d1 !default;
+`), 0755)
+
+	assert := require.New(t)
+	src := bytes.NewBufferString(`
+@import "colors";
+
+div { p { color: $moo; } }`)
+
+	var dst bytes.Buffer
+
+	transpiler, err := New(scss.Options{
+		IncludePaths:            []string{dir},
+		EnableEmbeddedSourceMap: false,
+		SourceMapContents:       true,
+		OmitSourceMapURL:        false,
+		SourceMapFilename:       "source.map",
+		OutputPath:              "outout.css",
+		InputPath:               "input.scss",
+		SourceMapRoot:           "/my/root",
+	})
+	assert.NoError(err)
+
+	result, err := transpiler.Execute(&dst, src)
+	assert.NoError(err)
+	assert.Equal("div p {\n  color: #f442d1; }\n\n/*# sourceMappingURL=source.map */", dst.String())
+	assert.Equal("source.map", result.SourceMapFilename)
+	assert.Contains(result.SourceMapContent, `"sourceRoot": "/my/root",`)
+	assert.Contains(result.SourceMapContent, `"file": "outout.css",`)
+	assert.Contains(result.SourceMapContent, `"input.scss",`)
+	assert.Contains(result.SourceMapContent, `mappings": "AAGA,AAAM,GAAH,CAAG,CAAC,CAAC;EAAE,KAAK,ECFH,OAAO,GDEM"`)
 }
 
 func TestConcurrentTranspile(t *testing.T) {
@@ -77,7 +122,8 @@ func TestConcurrentTranspile(t *testing.T) {
 
 div { p { color: $white; } }`)
 				var dst bytes.Buffer
-				assert.NoError(transpiler.Execute(&dst, src))
+				_, err := transpiler.Execute(&dst, src)
+				assert.NoError(err)
 				assert.Equal("div p{color:#fff}\n", dst.String())
 			}
 		}()
@@ -101,7 +147,7 @@ func BenchmarkTranspile(b *testing.B) {
 		src.Reset()
 		dst.Reset()
 		src.WriteString(srcs)
-		if err := transpiler.Execute(&dst, &src); err != nil {
+		if _, err := transpiler.Execute(&dst, &src); err != nil {
 			b.Fatal(err)
 		}
 		if dst.String() != "div p{color:#ccc}\n" {
@@ -109,11 +155,3 @@ func BenchmarkTranspile(b *testing.B) {
 		}
 	}
 }
-
-// Options (tests)
-// SASS
-// SCSS
-// Preserve comments
-// Style (compressed?)
-// Basic benchmark
-// Multi threaded

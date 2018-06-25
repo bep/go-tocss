@@ -11,6 +11,7 @@ package scss
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type (
@@ -23,6 +24,43 @@ const (
 	CompactStyle
 	CompressedStyle
 )
+
+const (
+	nestedStyleStr     = "nested"
+	expandedStyleStr   = "expanded"
+	compactStyleStr    = "compact"
+	compressedStyleStr = "compressed"
+)
+
+var outputStyleFromString = map[string]OutputStyle{
+	nestedStyleStr:     NestedStyle,
+	expandedStyleStr:   ExpandedStyle,
+	compactStyleStr:    CompactStyle,
+	compressedStyleStr: CompressedStyle,
+}
+
+var outputStyleToString = map[OutputStyle]string{
+	NestedStyle:     nestedStyleStr,
+	ExpandedStyle:   expandedStyleStr,
+	CompactStyle:    compactStyleStr,
+	CompressedStyle: compressedStyleStr,
+}
+
+func OutputStyleFromString(style string) OutputStyle {
+	os, found := outputStyleFromString[strings.ToLower(style)]
+	if found {
+		return os
+	}
+	return NestedStyle
+}
+
+func OutputStyleToString(style OutputStyle) string {
+	os, found := outputStyleToString[style]
+	if found {
+		return os
+	}
+	return nestedStyleStr
+}
 
 type Options struct {
 	// Default is nested.
@@ -41,6 +79,9 @@ type Options struct {
 	// Source map settings
 	SourceMapFilename       string
 	SourceMapRoot           string
+	InputPath               string
+	OutputPath              string
+	SourceMapContents       bool
 	OmitSourceMapURL        bool
 	EnableEmbeddedSourceMap bool
 }
