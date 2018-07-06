@@ -1,0 +1,14 @@
+image: Visual Studio 2015
+clone_folder: C:\GOPATH\src\github.com\bep\go-tocss
+environment:
+  GOPATH: C:\GOPATH\
+  
+init:
+  - set PATH=%PATH%;C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin;%GOPATH%\bin
+  - go version
+  - go env
+install:
+  - go get -u -d github.com/wellington/go-libsass/libs
+  - go get -t ./...
+build_script:
+  - go test ./...
