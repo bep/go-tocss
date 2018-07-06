@@ -1,6 +1,6 @@
 
 [![Build Status](https://travis-ci.org/bep/go-tocss.svg?branch=master)](https://travis-ci.org/bep/go-tocss)
-
+[![Build status](https://ci.appveyor.com/api/projects/status/vulj5nlbrj67u8om?svg=true)](https://ci.appveyor.com/project/bep/go-tocss)
 
 This is currently a, hopefully, simple to use [LibSass](https://sass-lang.com/libsass) Go API. It uses the C bindings in [https://github.com/wellington/go-libsass/libs](https://github.com/wellington/go-libsass/tree/master/libs) to do the heavy lifting.
 
