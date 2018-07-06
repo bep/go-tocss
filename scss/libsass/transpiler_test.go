@@ -41,6 +41,25 @@ div { p { color: $white; } }`)
 	assert.Equal("div p {\n  color: #fff; }\n", dst.String())
 }
 
+func TestSassSyntax(t *testing.T) {
+	assert := require.New(t)
+	src := bytes.NewBufferString(`
+$color: #333;
+
+.content-navigation
+  border-color: $color
+`)
+
+	var dst bytes.Buffer
+
+	transpiler, err := New(scss.Options{OutputStyle: scss.CompressedStyle, SassSyntax: true})
+	assert.NoError(err)
+
+	_, err = transpiler.Execute(&dst, src)
+	assert.NoError(err)
+	assert.Equal(".content-navigation{border-color:#333}\n", dst.String())
+}
+
 func TestOutputStyle(t *testing.T) {
 	assert := require.New(t)
 	src := bytes.NewBufferString(`

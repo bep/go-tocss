@@ -76,6 +76,9 @@ type Options struct {
 	// to another URL or to return the body.
 	ImportResolver func(url string, prev string) (newURL string, body string, resolved bool)
 
+	// Used to indicate "old style" SASS for the input stream.
+	SassSyntax bool
+
 	// Source map settings
 	SourceMapFilename       string
 	SourceMapRoot           string

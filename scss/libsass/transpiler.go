@@ -7,6 +7,7 @@
 package libsass
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"os"
@@ -30,12 +31,24 @@ func New(options scss.Options) (tocss.Transpiler, error) {
 // older SASS (.sass) files, but the main entry (src) currently needs to be SCSS.
 func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) (tocss.Result, error) {
 	var result tocss.Result
+	var sourceStr string
 
-	b, err := ioutil.ReadAll(src)
-	if err != nil {
-		return result, err
+	if t.options.SassSyntax {
+		// LibSass does not support this directly, so have to handle the main SASS content
+		// special.
+		var buf bytes.Buffer
+		err := libs.ToScss(src, &buf)
+		if err != nil {
+			return result, err
+		}
+		sourceStr = buf.String()
+	} else {
+		b, err := ioutil.ReadAll(src)
+		if err != nil {
+			return result, err
+		}
+		sourceStr = string(b)
 	}
-	sourceStr := string(b)
 
 	dataCtx := libs.SassMakeDataContext(sourceStr)
 
