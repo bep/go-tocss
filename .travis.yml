@@ -1,29 +1,28 @@
-sudo: false
 language: go
-
+sudo: false
+dist: trusty
+git:
+  depth: false
 go:
-  - 1.9.x
-  - 1.10.x
+  - 1.11
   - tip
-
-matrix:
-  allow_failures:
-    - go: tip
-
-before_script:
-  - go get -u github.com/golang/lint/golint
-
-script:
-  - go test ./... -race
-
-after_script:
-  - test -z "$(gofmt -s -l -w . | tee /dev/stderr)"
-  - test -z "$(golint ./...     | tee /dev/stderr)"
-  - go vet ./...
-
 os:
   - linux
   - osx
-
-notifications:
-  email: false
+  - windows
+matrix:
+  allow_failures:
+    - go: tip
+  fast_finish: true
+  exclude:
+  - os: windows
+    go: tip
+install:
+  - mkdir -p $HOME/src
+  - mv $HOME/gopath/src/github.com/bep/go-tocss $HOME/src
+  - export TRAVIS_BUILD_DIR=$HOME/src/go-tocss
+  - cd $TRAVIS_BUILD_DIR
+script:
+  - go test -race ./...
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install mingw -y; export PATH=/c/tools/mingw64/bin:"$PATH"; fi
