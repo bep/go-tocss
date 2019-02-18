@@ -27,8 +27,7 @@ func New(options scss.Options) (tocss.Transpiler, error) {
 	return &libsassTranspiler{options: options}, nil
 }
 
-// Execute transpiles the SCSS from src into dst. Note that you can import
-// older SASS (.sass) files, but the main entry (src) currently needs to be SCSS.
+// Execute transpiles the SCSS or SASS from src into dst.
 func (t *libsassTranspiler) Execute(dst io.Writer, src io.Reader) (tocss.Result, error) {
 	var result tocss.Result
 	var sourceStr string
